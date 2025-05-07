@@ -40,7 +40,7 @@ end
 f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
-timer = 200;
+timer = 2;
 
 %% Solving
 for t=1:timer
