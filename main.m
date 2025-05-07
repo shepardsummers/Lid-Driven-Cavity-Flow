@@ -25,7 +25,7 @@ U_top = Re*vis/L; % Top velocity
 track = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 %% Initialization
-Rho_ref = 2;
+Rho_ref = 3;
 Rho = ones(1, N_y, N_x) * Rho_ref; % Density
 U = zeros(2, N_y, N_x); % Velocity
 
