@@ -17,10 +17,12 @@ w = [4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % weights for D2Q9
 c_s = 1/sqrt(3); % speed of sound (D2Q9)
 
 Tau = 1.2; % relaxation time
-Rho_in = 2;
 vis = (Tau-0.5) * c_s^2; % kinematic viscosity
 Re = 100; % Reanolds number
-U_top = Re*vis; % Top velocity
+L = 1; % Length of box
+U_top = Re*vis/L; % Top velocity
+
+track = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 %% Initialization
 Rho_ref = 2;
@@ -43,116 +45,263 @@ timer = 200;
 %% Solving
 for t=1:timer
     % Streaming / Boundary Conditions
-    for j = 1:N_y
-        for i = 1:N_x
-            if j == 1 % top boundary
-                if i == 1 % topleft
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(3,j,i) = f(3, j+1, i);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(7,j,i) = f(7, j+1, i+1);
-                    % Abnormal
-                    p_guess = sum((f(:,j,i+1) + f(:,j+1,i)))/2;
-                    f_new(2,j,i) = f_new(4,j,i);
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(3,j,i) - f_new(4,j,i) - f_new(7,j,i);
-                    f_new(8,j,i) = f_new(6,j,i);
-                    f_new(9,j,i) = f_new(7,j,i);
-                elseif i == N_x %topright
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(3,j,i) = f(3, j+1, i);
-                    f_new(6,j,i) = f(6, j+1, i-1);
-                    % Abnormal
-                    p_guess = sum((f(:,j,i-1) + f(:,j+1,i)))/2;
-                    f_new(4,j,i) = f_new(2,j,i);
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i);
-                    f_new(8,j,i) = f_new(6,j,i);
-                    f_new(9,j,i) = f_new(7,j,i);
-                else %top
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(3,j,i) = f(3, j+1, i);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(6,j,i) = f(6, j+1, i-1);
-                    f_new(7,j,i) = f(7, j+1, i+1);
-                    % Abnormal
-                    p = f_new(1,j,i) + f_new(2,j,i) + f_new(4,j,i) + 2*(f_new(3,j,i) + f_new(6,j,i) + f_new(7,j,i));
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(9,j,i) = (1/2)*(p*U_top - f_new(2,j,i) + 2*f_new(7,j,i) + f_new(4,j,i));
-                    f_new(8,j,i) = f_new(6,j,i) + f_new(3,j,i) + f_new(7,j,i) - f_new(5,j,i) - f_new(9,j,i);
-                end
-            elseif j == N_y % bot boundary
-                if i == 1 %botleft
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(5,j,i) = f(5, j-1, i);
-                    f_new(8,j,i) = f(8, j-1, i+1);
-                    % Abnormal
-                    p_guess = sum((f(:,j-1,i) + f(:,j,i+1)))/2;
-                    f_new(2,j,i) = f_new(4,j,i);
-                    f_new(3,j,i) = f_new(5,j,i);
-                    f_new(6,j,i) = f_new(8,j,i);
-                    f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(4,j,i) - f_new(5,j,i) - f_new(8,j,i);
-                    f_new(9,j,i) = f_new(7,j,i);
-                elseif i == N_x %botright
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(5,j,i) = f(5, j-1, i);
-                    f_new(9,j,i) = f(9, j-1, i-1);
-                    % Abnormal
-                    p_guess = sum((f(:,j-1,i) + f(:,j,i-1)))/2;
-                    f_new(3,j,i) = f_new(5,j,i);
-                    f_new(4,j,i) = f_new(2,j,i);
-                    f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(5,j,i) - f_new(9,j,i);
-                    f_new(7,j,i) = f_new(9,j,i);
-                    f_new(8,j,i) = f_new(6,j,i);
-                else %bot
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(5,j,i) = f(5, j-1, i);
-                    f_new(8,j,i) = f(8, j-1, i+1);
-                    f_new(9,j,i) = f(9, j-1, i-1);
-                    % Abnormal
-                    f_new(3,j,i) = f_new(5, j, i);
-                    f_new(6,j,i) = f_new(8, j, i) + (f_new(4,j,i)-f_new(2,j,i))/2;
-                    f_new(7,j,i) = f_new(9,j,i) - (f_new(4,j,i)-f_new(2,j,i))/2;
-                end
-            elseif i == 1 % left boundary
-                f_new(1,j,i) = f(1, j, i);
-                f_new(3,j,i) = f(3, j+1, i);
-                f_new(4,j,i) = f(4, j, i+1);
-                f_new(5,j,i) = f(5, j-1, i);
-                f_new(7,j,i) = f(7, j+1, i+1);
-                f_new(8,j,i) = f(8, j-1, i+1);
-                % Abnormal
-                f_new(2,j,i) = f_new(4,j,i);
-                f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
-                f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+    % for j = 1:N_y
+    %     for i = 1:N_x
+    %         % if j == 1 % top boundary
+    %         %     if i == 1 % topleft
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(3,j,i) = f(3, j+1, i);
+    %         %         f_new(4,j,i) = f(4, j, i+1);
+    %         %         f_new(7,j,i) = f(7, j+1, i+1);
+    %         %         % Abnormal
+    %         %         p_guess = sum((f(:,j,i+1) + f(:,j+1,i)))/2;
+    %         %         f_new(2,j,i) = f_new(4,j,i);
+    %         %         f_new(5,j,i) = f_new(3,j,i);
+    %         %         f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(3,j,i) - f_new(4,j,i) - f_new(7,j,i);
+    %         %         f_new(8,j,i) = f_new(6,j,i);
+    %         %         f_new(9,j,i) = f_new(7,j,i);
+    %         %     elseif i == N_x %topright
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(2,j,i) = f(2, j, i-1);
+    %         %         f_new(3,j,i) = f(3, j+1, i);
+    %         %         f_new(6,j,i) = f(6, j+1, i-1);
+    %         %         % Abnormal
+    %         %         p_guess = sum((f(:,j,i-1) + f(:,j+1,i)))/2;
+    %         %         f_new(4,j,i) = f_new(2,j,i);
+    %         %         f_new(5,j,i) = f_new(3,j,i);
+    %         %         f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i);
+    %         %         f_new(8,j,i) = f_new(6,j,i);
+    %         %         f_new(9,j,i) = f_new(7,j,i);
+    %         %     else %top
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(2,j,i) = f(2, j, i-1);
+    %         %         f_new(3,j,i) = f(3, j+1, i);
+    %         %         f_new(4,j,i) = f(4, j, i+1);
+    %         %         f_new(6,j,i) = f(6, j+1, i-1);
+    %         %         f_new(7,j,i) = f(7, j+1, i+1);
+    %         %         % Abnormal
+    %         %         p = f_new(1,j,i) + f_new(2,j,i) + f_new(4,j,i) + 2*(f_new(3,j,i) + f_new(6,j,i) + f_new(7,j,i));
+    %         %         f_new(5,j,i) = f_new(3,j,i);
+    %         %         f_new(9,j,i) = (1/2)*(p*U_top - f_new(2,j,i) + 2*f_new(7,j,i) + f_new(4,j,i));
+    %         %         f_new(8,j,i) = f_new(6,j,i) + f_new(7,j,i) - f_new(9,j,i);
+    %         %     end
+    %         % elseif j == N_y % bot boundary
+    %         %     if i == 1 %botleft
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(4,j,i) = f(4, j, i+1);
+    %         %         f_new(5,j,i) = f(5, j-1, i);
+    %         %         f_new(8,j,i) = f(8, j-1, i+1);
+    %         %         % Abnormal
+    %         %         p_guess = sum((f(:,j-1,i) + f(:,j,i+1)))/2;
+    %         %         f_new(2,j,i) = f_new(4,j,i);
+    %         %         f_new(3,j,i) = f_new(5,j,i);
+    %         %         f_new(6,j,i) = f_new(8,j,i);
+    %         %         f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(4,j,i) - f_new(5,j,i) - f_new(8,j,i);
+    %         %         f_new(9,j,i) = f_new(7,j,i);
+    %         %     elseif i == N_x %botright
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(2,j,i) = f(2, j, i-1);
+    %         %         f_new(5,j,i) = f(5, j-1, i);
+    %         %         f_new(9,j,i) = f(9, j-1, i-1);
+    %         %         % Abnormal
+    %         %         p_guess = sum((f(:,j-1,i) + f(:,j,i-1)))/2;
+    %         %         f_new(3,j,i) = f_new(5,j,i);
+    %         %         f_new(4,j,i) = f_new(2,j,i);
+    %         %         f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(5,j,i) - f_new(9,j,i);
+    %         %         f_new(7,j,i) = f_new(9,j,i);
+    %         %         f_new(8,j,i) = f_new(6,j,i);
+    %         %     else %bot
+    %         %         f_new(1,j,i) = f(1, j, i);
+    %         %         f_new(2,j,i) = f(2, j, i-1);
+    %         %         f_new(4,j,i) = f(4, j, i+1);
+    %         %         f_new(5,j,i) = f(5, j-1, i);
+    %         %         f_new(8,j,i) = f(8, j-1, i+1);
+    %         %         f_new(9,j,i) = f(9, j-1, i-1);
+    %         %         % Abnormal
+    %         %         f_new(3,j,i) = f_new(5, j, i);
+    %         %         f_new(6,j,i) = f_new(8, j, i) + (f_new(4,j,i) + f_new(2,j,i))/2;
+    %         %         f_new(7,j,i) = f_new(9,j,i) - (f_new(4,j,i) + f_new(2,j,i))/2;
+    %         %     end
+    %         % elseif i == 1 % left boundary
+    %         %     f_new(1,j,i) = f(1, j, i);
+    %         %     f_new(3,j,i) = f(3, j+1, i);
+    %         %     f_new(4,j,i) = f(4, j, i+1);
+    %         %     f_new(5,j,i) = f(5, j-1, i);
+    %         %     f_new(7,j,i) = f(7, j+1, i+1);
+    %         %     f_new(8,j,i) = f(8, j-1, i+1);
+    %         %     % Abnormal
+    %         %     f_new(2,j,i) = f_new(4,j,i);
+    %         %     f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+    %         %     f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+    %         % elseif i == N_x % right boundary
+    %         %     f_new(1,j,i) = f(1, j, i);
+    %         %     f_new(2,j,i) = f(2, j, i-1);
+    %         %     f_new(3,j,i) = f(3, j+1, i);
+    %         %     f_new(5,j,i) = f(5, j-1, i);
+    %         %     f_new(6,j,i) = f(6, j+1, i-1);
+    %         %     f_new(9,j,i) = f(9, j-1, i-1);
+    %         %     % Abnormal
+    %         %     f_new(4,j,i) = f_new(2,j,i);
+    %         %     f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+    %         %     f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+    %         % else % interior
+    %         %     f_new(1,j,i) = f(1, j, i);
+    %         %     f_new(2,j,i) = f(2, j, i-1);
+    %         %     f_new(3,j,i) = f(3, j+1, i);
+    %         %     f_new(4,j,i) = f(4, j, i+1);
+    %         %     f_new(5,j,i) = f(5, j-1, i);
+    %         %     f_new(6,j,i) = f(6, j+1, i-1);
+    %         %     f_new(7,j,i) = f(7, j+1, i+1);
+    %         %     f_new(8,j,i) = f(8, j-1, i+1);
+    %         %     f_new(9,j,i) = f(9, j-1, i-1);
+    %         % end
+    % 
+    % 
+    % 
+    %     end
+    % 
+    % end
+    for j = 2:N_y-1
+        for i = [1, N_x]
+            % Right/left boundary
+            if i == 1 % left boundary
+            f_new(1,j,i) = f(1, j, i);
+            f_new(3,j,i) = f(3, j+1, i);
+            f_new(4,j,i) = f(4, j, i+1);
+            f_new(5,j,i) = f(5, j-1, i);
+            f_new(7,j,i) = f(7, j+1, i+1);
+            f_new(8,j,i) = f(8, j-1, i+1);
+            % Abnormal
+            f_new(2,j,i) = f_new(4,j,i);
+            f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+            f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+
+            track(1) = track(1) + 1;
             elseif i == N_x % right boundary
-                f_new(1,j,i) = f(1, j, i);
-                f_new(2,j,i) = f(2, j, i-1);
-                f_new(3,j,i) = f(3, j+1, i);
-                f_new(5,j,i) = f(5, j-1, i);
-                f_new(6,j,i) = f(6, j+1, i-1);
-                f_new(9,j,i) = f(9, j-1, i-1);
-                % Abnormal
-                f_new(4,j,i) = f_new(2,j,i);
-                f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
-                f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
-            else % interior
+            f_new(1,j,i) = f(1, j, i);
+            f_new(2,j,i) = f(2, j, i-1);
+            f_new(3,j,i) = f(3, j+1, i);
+            f_new(5,j,i) = f(5, j-1, i);
+            f_new(6,j,i) = f(6, j+1, i-1);
+            f_new(9,j,i) = f(9, j-1, i-1);
+            % Abnormal
+            f_new(4,j,i) = f_new(2,j,i);
+            f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+            f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+
+            track(2) = track(2) + 1;
+            end
+        end
+    end
+    for j = [1, N_y]
+        for i = 2:N_x-1
+            % Top/Bot boundary
+            if j == 1 % top boundary
                 f_new(1,j,i) = f(1, j, i);
                 f_new(2,j,i) = f(2, j, i-1);
                 f_new(3,j,i) = f(3, j+1, i);
                 f_new(4,j,i) = f(4, j, i+1);
-                f_new(5,j,i) = f(5, j-1, i);
                 f_new(6,j,i) = f(6, j+1, i-1);
                 f_new(7,j,i) = f(7, j+1, i+1);
+                % Abnormal
+                p = f_new(1,j,i) + f_new(2,j,i) + f_new(4,j,i) + 2*(f_new(3,j,i) + f_new(6,j,i) + f_new(7,j,i));
+                f_new(5,j,i) = f_new(3,j,i);
+                f_new(9,j,i) = (1/2)*(p*U_top - f_new(2,j,i) + 2*f_new(7,j,i) + f_new(4,j,i));
+                f_new(8,j,i) = f_new(6,j,i) + f_new(7,j,i) - f_new(9,j,i);
+
+                track(3) = track(3) + 1;
+            elseif j == N_y % bot
+                f_new(1,j,i) = f(1, j, i);
+                f_new(2,j,i) = f(2, j, i-1);
+                f_new(4,j,i) = f(4, j, i+1);
+                f_new(5,j,i) = f(5, j-1, i);
                 f_new(8,j,i) = f(8, j-1, i+1);
                 f_new(9,j,i) = f(9, j-1, i-1);
+                % Abnormal
+                f_new(3,j,i) = f_new(5, j, i);
+                f_new(6,j,i) = f_new(8, j, i) + (f_new(4,j,i) + f_new(2,j,i))/2;
+                f_new(7,j,i) = f_new(9,j,i) - (f_new(4,j,i) + f_new(2,j,i))/2;
+
+                track(4) = track(4) + 1;
             end
+        end
+    end
+    for j = [1, N_y]
+        for i = [1, N_x]
+            % Corners
+            if i == 1 && j == 1 % topleft
+                f_new(1,j,i) = f(1, j, i);
+                f_new(3,j,i) = f(3, j+1, i);
+                f_new(4,j,i) = f(4, j, i+1);
+                f_new(7,j,i) = f(7, j+1, i+1);
+                % Abnormal
+                p_guess = sum((f_new(:,j,i+1) + f_new(:,j+1,i)))/2;
+                f_new(2,j,i) = f_new(4,j,i);
+                f_new(5,j,i) = f_new(3,j,i);
+                f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(3,j,i) - f_new(4,j,i) - f_new(7,j,i);
+                f_new(8,j,i) = f_new(6,j,i);
+                f_new(9,j,i) = f_new(7,j,i);
+
+                track(5) = track(5) + 1;
+            elseif i == N_x && j == 1 %topright
+                f_new(1,j,i) = f(1, j, i);
+                f_new(2,j,i) = f(2, j, i-1);
+                f_new(3,j,i) = f(3, j+1, i);
+                f_new(6,j,i) = f(6, j+1, i-1);
+                % Abnormal
+                p_guess = sum((f_new(:,j,i-1) + f_new(:,j+1,i)))/2;
+                f_new(4,j,i) = f_new(2,j,i);
+                f_new(5,j,i) = f_new(3,j,i);
+                f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i);
+                f_new(8,j,i) = f_new(6,j,i);
+                f_new(9,j,i) = f_new(7,j,i);
+
+                track(6) = track(6) + 1;
+            elseif i == 1 && j == N_y %botleft
+                f_new(1,j,i) = f(1, j, i);
+                f_new(4,j,i) = f(4, j, i+1);
+                f_new(5,j,i) = f(5, j-1, i);
+                f_new(8,j,i) = f(8, j-1, i+1);
+                % Abnormal
+                p_guess = sum((f_new(:,j-1,i) + f_new(:,j,i+1)))/2;
+                f_new(2,j,i) = f_new(4,j,i);
+                f_new(3,j,i) = f_new(5,j,i);
+                f_new(6,j,i) = f_new(8,j,i);
+                f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(4,j,i) - f_new(5,j,i) - f_new(8,j,i);
+                f_new(9,j,i) = f_new(7,j,i);
+
+                track(7) = track(7) + 1;
+            elseif i == N_x && j == N_y %botright
+                f_new(1,j,i) = f(1, j, i);
+                f_new(2,j,i) = f(2, j, i-1);
+                f_new(5,j,i) = f(5, j-1, i);
+                f_new(9,j,i) = f(9, j-1, i-1);
+                % Abnormal
+                p_guess = sum((f_new(:,j-1,i) + f_new(:,j,i-1)))/2;
+                f_new(3,j,i) = f_new(5,j,i);
+                f_new(4,j,i) = f_new(2,j,i);
+                f_new(6,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(5,j,i) - f_new(9,j,i);
+                f_new(7,j,i) = f_new(9,j,i);
+                f_new(8,j,i) = f_new(6,j,i);
+
+                track(8) = track(8) + 1;
+            end
+        end
+    end
+    for j = 2:N_y-1
+        for i = 2:N_x-1
+            % interior
+            f_new(1,j,i) = f(1, j, i);
+            f_new(2,j,i) = f(2, j, i-1);
+            f_new(3,j,i) = f(3, j+1, i);
+            f_new(4,j,i) = f(4, j, i+1);
+            f_new(5,j,i) = f(5, j-1, i);
+            f_new(6,j,i) = f(6, j+1, i-1);
+            f_new(7,j,i) = f(7, j+1, i+1);
+            f_new(8,j,i) = f(8, j-1, i+1);
+            f_new(9,j,i) = f(9, j-1, i-1);
+
+            track(9) = track(9) + 1;
         end
     end
     % Collision
@@ -182,3 +331,5 @@ axis equal tight
 figure
 contourf(flipud(squeeze(Rho)),30)
 axis equal tight
+
+track = track/timer;
