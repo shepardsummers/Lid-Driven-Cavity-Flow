@@ -38,7 +38,7 @@ end
 f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
-timer = 500;
+timer = 200;
 
 %% Solving
 for t=1:timer
@@ -67,7 +67,7 @@ for t=1:timer
                     p_guess = sum((f(:,j,i-1) + f(:,j+1,i)))/2;
                     f_new(4,j,i) = f_new(2,j,i);
                     f_new(5,j,i) = f_new(3,j,i);
-                    f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(4,j,i) - f_new(3,j,i) - f_new(6,j,i);
+                    f_new(7,j,i) = p_guess/2 - f_new(1,j,i)/2 - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i);
                     f_new(8,j,i) = f_new(6,j,i);
                     f_new(9,j,i) = f_new(7,j,i);
                 else %top
