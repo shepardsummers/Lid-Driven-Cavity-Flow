@@ -1,8 +1,8 @@
 function [rho,u] = rhoNu(f,ksi)
     % This function is self explainitory
 
-    rho = sum(f);
+    rho = sum(f, 1);
 
-    u = (ksi*f)/rho;
+    u = (pagemtimes(ksi,f))./rho;
 end
 
