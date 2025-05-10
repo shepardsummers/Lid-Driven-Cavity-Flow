@@ -129,30 +129,31 @@ for t = 1:max_timer
                     f_new(7,j,i) = f_new(9,j,i) - (f_new(4,j,i)-f_new(2,j,i))/2;
                 end
             elseif i == 1 % left boundary
-                f_new(1,j,i) = f(1, j, i);
-                f_new(3,j,i) = f(3, j+1, i);
-                f_new(4,j,i) = f(4, j, i+1);
-                f_new(5,j,i) = f(5, j-1, i);
-                f_new(7,j,i) = f(7, j+1, i+1);
-                f_new(8,j,i) = f(8, j-1, i+1);
-                % Abnormal
-                f_new(2,j,i) = f_new(4,j,i);
-                f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
-                f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2; 
-            % elseif i == N_x % right boundary
-            %     f_new(1,j,i) = f(1, j, i);
-            %     f_new(2,j,i) = f(2, j, i-1);
-            %     f_new(3,j,i) = f(3, j+1, i);
-            %     f_new(5,j,i) = f(5, j-1, i);
-            %     f_new(6,j,i) = f(6, j+1, i-1);
-            %     f_new(9,j,i) = f(9, j-1, i-1);
-            %     % Abnormal
-            %     f_new(4,j,i) = f_new(2,j,i);
-            %     f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
-            %     f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
+                % f_new(1,j,i) = f(1, j, i);
+                % f_new(3,j,i) = f(3, j+1, i);
+                % f_new(4,j,i) = f(4, j, i+1);
+                % f_new(5,j,i) = f(5, j-1, i);
+                % f_new(7,j,i) = f(7, j+1, i+1);
+                % f_new(8,j,i) = f(8, j-1, i+1);
+                % % Abnormal
+                % f_new(2,j,i) = f_new(4,j,i);
+                % f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+                % f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2; 
             end
         end
     end
+    % Left boundary
+    f_new(1, int_y, 1) = f(1, int_y  , 1  );
+    f_new(3, int_y, 1) = f(3, int_y+1, 1  );
+    f_new(4, int_y, 1) = f(4, int_y  , 1+1);
+    f_new(5, int_y, 1) = f(5, int_y-1, 1  );
+    f_new(7, int_y, 1) = f(7, int_y+1, 1+1);
+    f_new(8, int_y, 1) = f(8, int_y-1, 1+1);
+    % Abnormal
+    f_new(2, int_y, 1) = f_new(4, int_y  , 1  ); % Bounceback
+    f_new(6, int_y, 1) = f_new(8, int_y  , 1  ) + (f_new(5, int_y  , 1  ) - f_new(3, int_y  , 1  ))/2;
+    f_new(9, int_y, 1) = f_new(7, int_y  , 1  ) - (f_new(5, int_y  , 1  ) - f_new(3, int_y  , 1  ))/2;
+
     % Right boundary
     f_new(1, int_y, N_x) = f(1, int_y  , N_x  );
     f_new(2, int_y, N_x) = f(2, int_y  , N_x-1);
