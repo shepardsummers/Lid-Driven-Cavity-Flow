@@ -39,7 +39,9 @@ f_eq = f; % Equilibrium
 timer = 0;
 max_timer = 2000;
 cont = true;
+figure
 r = animatedline;
+title("Residuals")
 
 
 %% Solving
@@ -51,76 +53,70 @@ int_y = 2:(N_x-1);
 
 for t = 1:max_timer
     % Streaming / Boundary Conditions
-    for j = 1:N_y
-        for i = 1:N_x
-            if j == 1 % top boundary
-                if i == 1 % topleft
-                    f_new(1,j,i) = f(1,j,i);
-                    f_new(3,j,i) = f(3,j+1,i);
-                    f_new(4,j,i) = f(4,j,i+1);
-                    f_new(7,j,i) = f(7,j+1,i+1);
-                    % Abnormal
-                    Rho_c = Rho(1,j,i+1);
-                    f_new(2,j,i) = f_new(4,j,i);
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(9,j,i) = f_new(7,j,i);
-                    f_new(6,j,i) = (Rho_c - f_new(1,j,i) - f_new(2,j,i) - f_new(3,j,i) - f_new(4,j,i) - f_new(5,j,i) - f_new(7,j,i) - f_new(9,j,i))/2;
-                    % f_new(6,j,i) = (rho - others except for 6,8)/2
-                    f_new(8,j,i) = f_new(6,j,i);
-                elseif i == N_x %topright
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(3,j,i) = f(3, j+1, i);
-                    f_new(6,j,i) = f(6, j+1, i-1);
-                    % Abnormal
-                    Rho_c = Rho(1,j,i-1);
-                    f_new(4,j,i) = f_new(2,j,i);
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(8,j,i) = f_new(6,j,i);
-                    f_new(7,j,i) = (Rho_c - f_new(1,j,i) - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i) - f_new(5,j,i) - f_new(8,j,i) - f_new(4,j,i))/2;
-                    f_new(9,j,i) = f_new(7,j,i);
-                else %top
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(3,j,i) = f(3, j+1, i);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(6,j,i) = f(6, j+1, i-1);
-                    f_new(7,j,i) = f(7, j+1, i+1);
-                    % Abnormal
-                    p = f_new(1,j,i) + f_new(2,j,i) + f_new(4,j,i) + 2*(f_new(3,j,i) + f_new(6,j,i) + f_new(7,j,i));
-                    f_new(5,j,i) = f_new(3,j,i);
-                    f_new(8,j,i) = (1/2)*(-p*U_top + f_new(2,j,i) + 2*f_new(6,j,i) - f_new(4,j,i));
-                    f_new(9,j,i) = (1/2)*(p*U_top - f_new(2,j,i) + 2*f_new(7,j,i) + f_new(4,j,i));
-                end
-            elseif j == N_y % bot boundary
-                if i == 1 %botleft
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(4,j,i) = f(4, j, i+1);
-                    f_new(5,j,i) = f(5, j-1, i);
-                    f_new(8,j,i) = f(8, j-1, i+1);
-                    % Abnormal
-                    Rho_c = Rho(1, j, i+1);
-                    f_new(2,j,i) = f_new(4,j,i);
-                    f_new(3,j,i) = f_new(5, j, i);
-                    f_new(6,j,i) = f_new(8, j, i);
-                    f_new(7,j,i) = (Rho_c - f_new(1,j,i) - f_new(4,j,i) - f_new(5,j,i) - f_new(8,j,i) - f_new(2,j,i) - f_new(3,j,i) - f_new(6,j,i))/2;
-                    f_new(9,j,i) = f_new(7,j,i);
-                elseif i == N_x %botright
-                    f_new(1,j,i) = f(1, j, i);
-                    f_new(2,j,i) = f(2, j, i-1);
-                    f_new(5,j,i) = f(5, j-1, i);
-                    f_new(9,j,i) = f(9, j-1, i-1);
-                    % Abnormal
-                    Rho_c = Rho(1,j,i-1);
-                    f_new(3,j,i) = f_new(5,j,i);
-                    f_new(4,j,i) = f_new(2,j,i);
-                    f_new(7,j,i) = f_new(9,j,i);
-                    f_new(6,j,i) = (Rho_c - f_new(1,j,i) - f_new(2,j,i) - f_new(5,j,i) - f_new(9,j,i) - f_new(3,j,i) - f_new(4,j,i) - f_new(7,j,i))/2;
-                    f_new(8,j,i) = f_new(6,j,i);
-                end
-            end
-        end
-    end
+    % Top left
+    f_new(1, 1, 1) = f(1, 1  , 1  );
+    f_new(3, 1, 1) = f(3, 1+1, 1  );
+    f_new(4, 1, 1) = f(4, 1  , 1+1);
+    f_new(7, 1, 1) = f(7, 1+1, 1+1);
+    % Abnormal
+    Rho_c = Rho(1, 1, 1+1);
+    f_new(2, 1, 1) = f_new(4, 1, 1);
+    f_new(5, 1, 1) = f_new(3, 1, 1);
+    f_new(9, 1, 1) = f_new(7, 1, 1);
+    f_new(6, 1, 1) = (Rho_c - f_new(1, 1, 1) - f_new(2, 1, 1) - f_new(3, 1, 1) - f_new(4, 1, 1) - f_new(5, 1, 1) - f_new(7, 1, 1) - f_new(9, 1, 1))/2;
+    f_new(8, 1, 1) = f_new(6, 1, 1);
+
+    % Top right
+    f_new(1, 1, N_x) = f(1, 1  , N_x  );
+    f_new(2, 1, N_x) = f(2, 1  , N_x-1);
+    f_new(3, 1, N_x) = f(3, 1+1, N_x  );
+    f_new(6, 1, N_x) = f(6, 1+1, N_x-1);
+    % Abnormal
+    Rho_c = Rho(1, 1, N_x-1);
+    f_new(4, 1, N_x) = f_new(2, 1, N_x);
+    f_new(5, 1, N_x) = f_new(3, 1, N_x);
+    f_new(8, 1, N_x) = f_new(6, 1, N_x);
+    f_new(1, 1, N_x) = (Rho_c - f_new(1, 1, N_x) - f_new(2, 1, N_x) - f_new(3, 1, N_x) - f_new(6, 1, N_x) - f_new(5, 1, N_x) - f_new(8, 1, N_x) - f_new(4, 1, N_x))/2;
+    f_new(9, 1, N_x) = f_new(7, 1, N_x);
+
+    % Top
+    f_new(1, 1, int_x) = f(1, 1  , int_x  );
+    f_new(2, 1, int_x) = f(2, 1  , int_x-1);
+    f_new(3, 1, int_x) = f(3, 1+1, int_x  );
+    f_new(4, 1, int_x) = f(4, 1  , int_x+1);
+    f_new(6, 1, int_x) = f(6, 1+1, int_x-1);
+    f_new(7, 1, int_x) = f(7, 1+1, int_x+1);
+    % Abnormal
+    p = f_new(1, 1, int_x) + f_new(2, 1, int_x) + f_new(4, 1, int_x) + 2*f_new(3, 1, int_x) + f_new(6, 1, int_x) + f_new(7, 1, int_x);
+    f_new(5, 1, int_x) = f_new(3, 1, int_x); % Bounceback
+    f_new(8, 1, int_x) = (-p*U_top + f_new(2, 1, int_x) + 2*f_new(6, 1, int_x) - f_new(4, 1, int_x))/2;
+    f_new(9, 1, int_x) = ( p*U_top - f_new(2, 1, int_x) + 2*f_new(7, 1, int_x) + f_new(4, 1, int_x))/2;
+
+    % Bottom left corner
+    f_new(1, N_y, 1) = f(1, N_y  , 1  );
+    f_new(4, N_y, 1) = f(4, N_y  , 1+1);
+    f_new(5, N_y, 1) = f(5, N_y-1, 1  );
+    f_new(8, N_y, 1) = f(8, N_y-1, 1+1);
+    % Abnormal
+    f_new(2, N_y, 1) = f(4, N_y, 1); % Bounceback
+    f_new(3, N_y, 1) = f(5, N_y, 1); % Bounceback
+    f_new(6, N_y, 1) = f(8, N_y, 1); % Bounceback
+    f_new(7, N_y, 1) = (Rho_c - f_new(1, N_y, 1) - f_new(4, N_y, 1) - f_new(5, N_y, 1) - f_new(8, N_y, 1) - f_new(2, N_y, 1) - f_new(3, N_y, 1) - f_new(6, N_y, 1))/2;
+    f_new(9, N_y, 1) = f_new(7, N_y, 1);
+
+    % Bottom right corner
+    f_new(1, N_y, N_x) = f(1, N_y  , N_x  );
+    f_new(2, N_y, N_x) = f(2, N_y  , N_x-1);
+    f_new(5, N_y, N_x) = f(5, N_y-1, N_x  );
+    f_new(9, N_y, N_x) = f(9, N_y-1, N_x-1);
+    % Abnormal
+    Rho_c = Rho(1, N_x, N_x-1); % Approximation for rho
+    f_new(3, N_y, N_x) = f_new(5, N_y, N_x); % Bounceback
+    f_new(4, N_y, N_x) = f_new(2, N_y, N_x); % Bounceback
+    f_new(7, N_y, N_x) = f_new(9, N_y, N_x); % Bounceback
+    f_new(6, N_y, N_x) = (Rho_c - f_new(1, N_y, N_x) - f_new(2, N_y, N_x) - f_new(5, N_y, N_x) - f_new(9, N_y, N_x) - f_new(3, N_y, N_x) - f_new(4, N_y, N_x) - f_new(7, N_y, N_x))/2;
+    f_new(8, N_y, N_x) = f_new(6, N_y, N_x);
+
     % Bottom boundary
     f_new(1, N_y, int_x) = f(1, N_y  , int_x  );
     f_new(2, N_y, int_x) = f(2, N_y  , int_x-1);
@@ -197,8 +193,8 @@ figure
 contourf(flipud(squeeze(Rho)),30)
 axis equal tight
 
-Vertical_Sample = U(1, 65, :)/U_top;
-Horizontal_Sample = U(2, :, 65)/U_top;
+Vertical_Sample = U(1, :, 65)/U_top;
+Horizontal_Sample = U(2, 65, :)/U_top;
 
 figure
 plot(flip(squeeze(Vertical_Sample)), (1:L)/L, flip(u_Ghia), flip(y_Ghia))
@@ -206,8 +202,10 @@ title("Vertical Sample (U)")
 %figure
 %plot(flip(Vertical_Sample), (1:L)/L)
 figure
-plot(squeeze(Horizontal_Sample), (1:L)/L, flip(x_Ghia), flip(v_Ghia))
+plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v_Ghia))
 title("Horizontal Sample (V)")
+xlabel("x")
+ylabel("v")
 %figure
 %plot((1:L)/L, squeeze(Horizontal_Sample))
 figure
