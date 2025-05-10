@@ -139,33 +139,33 @@ for t = 1:max_timer
                 f_new(2,j,i) = f_new(4,j,i);
                 f_new(6,j,i) = f_new(8,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
                 f_new(9,j,i) = f_new(7,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2; 
-            elseif i == N_x % right boundary
-                f_new(1,j,i) = f(1, j, i);
-                f_new(2,j,i) = f(2, j, i-1);
-                f_new(3,j,i) = f(3, j+1, i);
-                f_new(5,j,i) = f(5, j-1, i);
-                f_new(6,j,i) = f(6, j+1, i-1);
-                f_new(9,j,i) = f(9, j-1, i-1);
-                % Abnormal
-                f_new(4,j,i) = f_new(2,j,i);
-                f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
-                f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
-            % else % interior
+            % elseif i == N_x % right boundary
             %     f_new(1,j,i) = f(1, j, i);
             %     f_new(2,j,i) = f(2, j, i-1);
             %     f_new(3,j,i) = f(3, j+1, i);
-            %     f_new(4,j,i) = f(4, j, i+1);
             %     f_new(5,j,i) = f(5, j-1, i);
             %     f_new(6,j,i) = f(6, j+1, i-1);
-            %     f_new(7,j,i) = f(7, j+1, i+1);
-            %     f_new(8,j,i) = f(8, j-1, i+1);
             %     f_new(9,j,i) = f(9, j-1, i-1);
-            % 
-            % 
+            %     % Abnormal
+            %     f_new(4,j,i) = f_new(2,j,i);
+            %     f_new(7,j,i) = f_new(9,j,i) + (f_new(5,j,i) - f_new(3,j,i))/2;
+            %     f_new(8,j,i) = f_new(6,j,i) - (f_new(5,j,i) - f_new(3,j,i))/2;
             end
         end
     end
-    %All interior nodes
+    % Right boundary
+    f_new(1, int_y, N_x) = f(1, int_y  , N_x  );
+    f_new(2, int_y, N_x) = f(2, int_y  , N_x-1);
+    f_new(3, int_y, N_x) = f(3, int_y+1, N_x  );
+    f_new(5, int_y, N_x) = f(5, int_y-1, N_x  );
+    f_new(6, int_y, N_x) = f(6, int_y+1, N_x-1);
+    f_new(9, int_y, N_x) = f(9, int_y-1, N_x-1);
+    % Abnormal
+    f_new(4, int_y, N_x) = f_new(2, int_y  , N_x  ); % Bounceback
+    f_new(7, int_y, N_x) = f_new(9, int_y  , N_x  ) + (f_new(5, int_y  , N_x  ) - f_new(3, int_y  , N_x  ))/2;
+    f_new(8, int_y, N_x) = f_new(6, int_y  , N_x  ) - (f_new(5, int_y  , N_x  ) - f_new(3, int_y  , N_x  ))/2;
+
+    % All interior nodes
     f_new(1, int_y, int_x) = f(1, int_y  , int_x  );
     f_new(2, int_y, int_x) = f(2, int_y  , int_x-1);
     f_new(3, int_y, int_x) = f(3, int_y+1, int_x  );
