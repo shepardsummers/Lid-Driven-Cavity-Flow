@@ -16,7 +16,7 @@ w = [4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % weights for D2Q9
 
 c_s = 1/sqrt(3); % speed of sound (D2Q9)
 
-Tau = 0.8; % relaxation time
+Tau = 1; % relaxation time
 Rho_in = 2;
 vis = (Tau-0.5) * c_s^2; % kinematic viscosity
 Re = 100; % Reanolds number
@@ -37,11 +37,11 @@ f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
 timer = 0;
-max_timer = 2000;
+max_timer = 10000;
 cont = true;
-figure
-r = animatedline;
-title("Residuals")
+%figure
+%r = animatedline;
+%title("Residuals")
 
 
 %% Solving
@@ -174,10 +174,10 @@ for t = 1:max_timer
     % BGK Collision and Update
     f = f_new - (f_new-f_eq)/Tau;
 
-    [guh, max_error] = res(Rho_old, Rho, min_error);
+    %[guh, max_error] = res(Rho_old, Rho, min_error);
     
-    addpoints(r, t, max_error)
-    drawnow
+    %addpoints(r, t, max_error)
+    %drawnow
 
     %progress(timer, t);
 end
@@ -197,17 +197,16 @@ Vertical_Sample = U(1, :, 65)/U_top;
 Horizontal_Sample = U(2, 65, :)/U_top;
 
 figure
-plot(flip(squeeze(Vertical_Sample)), (1:L)/L, flip(u_Ghia), flip(y_Ghia))
+plot(squeeze(Vertical_Sample), flip((1:L)/L), flip(u_Ghia), flip(y_Ghia))
 title("Vertical Sample (U)")
-%figure
-%plot(flip(Vertical_Sample), (1:L)/L)
+xlabel("u")
+ylabel("y")
 figure
 plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v_Ghia))
 title("Horizontal Sample (V)")
 xlabel("x")
 ylabel("v")
-%figure
-%plot((1:L)/L, squeeze(Horizontal_Sample))
+
 figure
 u = flip(squeeze(U(1, :, :)));
 v = squeeze(U(2, :, :));
