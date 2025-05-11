@@ -2,7 +2,8 @@
 clear, clc;
 
 % Domain Related
-N_x = 129; % num of x nodes
+N_x = 1001; % num of x nodes
+%6451
 N_y = N_x; % num of y nodes
 d_x = 1; % dist between x nodes
 d_y = 1; % dist between y nodes
@@ -16,10 +17,10 @@ w = [4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % weights for D2Q9
 
 c_s = 1/sqrt(3); % speed of sound (D2Q9)
 
-Tau = 1; % relaxation time
+Tau = 0.8; % relaxation time
 Rho_in = 2;
 vis = (Tau-0.5) * c_s^2; % kinematic viscosity
-Re = 100; % Reanolds number
+Re = 5000; % Reanolds number
 L = N_x; % Length of box
 U_top = Re*vis/L; % Top velocity
 min_error = 0.000001; % error when sim ends
@@ -37,7 +38,7 @@ f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
 timer = 0;
-max_timer = 10000;
+max_timer = 40000;
 cont = true;
 %figure
 %r = animatedline;
@@ -46,6 +47,7 @@ cont = true;
 
 %% Solving
 tic
+res_list = zeros(1, max_timer);
 
 % Interior nodes
 int_x = 2:(N_x-1);
@@ -174,35 +176,40 @@ for t = 1:max_timer
     % BGK Collision and Update
     f = f_new - (f_new-f_eq)/Tau;
 
-    %[guh, max_error] = res(Rho_old, Rho, min_error);
+    [guh, res_list(t)] = res(Rho_old, Rho, min_error);
     
     %addpoints(r, t, max_error)
     %drawnow
 
     %progress(timer, t);
+    fprintf("Itt: %i     ||     Res: %.4e\n", t, res_list(t))
 end
-toc
+total_time = toc;
 %% Post-Processing / Visualization
 clc;
 load Ghia_Re100.mat
-figure
-quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),10)
-axis equal tight
+% figure
+% quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),10)
+% axis equal tight
 
 figure
 contourf(flipud(squeeze(Rho)),30)
 axis equal tight
 
-Vertical_Sample = U(1, :, 65)/U_top;
-Horizontal_Sample = U(2, 65, :)/U_top;
+mid = N_x/2+0.5;
+Vertical_Sample = U(1, :, mid)/U_top;
+Horizontal_Sample = U(2, mid, :)/U_top;
+
+u2_Ghia = [1 0.48223 0.46120 0.45992 0.46036 0.33556 0.20087 0.08183 -0.03039 -0.07404 -0.22855 -0.33050 -0.40435 -0.43643 -0.42901 -0.41165 0.00000 ];
+v2_Ghia = [0.00000 -0.49774 -0.55069 -0.55408 -0.52876 -0.41442 -0.36214 -0.30018 0.00945 0.27280 0.28066 0.35368 0.42951 0.43648 0.43329 0.42447 0.00000];
 
 figure
-plot(squeeze(Vertical_Sample), flip((1:L)/L), flip(u_Ghia), flip(y_Ghia))
+plot(squeeze(Vertical_Sample), flip((1:L)/L), flip(u2_Ghia), flip(y_Ghia))
 title("Vertical Sample (U)")
 xlabel("u")
 ylabel("y")
 figure
-plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v_Ghia))
+plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v2_Ghia))
 title("Horizontal Sample (V)")
 xlabel("x")
 ylabel("v")
@@ -210,7 +217,7 @@ ylabel("v")
 figure
 u = flip(squeeze(U(1, :, :)));
 v = squeeze(U(2, :, :));
-[startX, startY] = meshgrid(1:5:N_x, 1:5:N_y);
+[startX, startY] = meshgrid(1:50:N_x, 1:50:N_y);
 verts = stream2(1:N_x,1:N_y,u,v,startX,startY);
 streamline(verts)
 

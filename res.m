@@ -1,7 +1,7 @@
 function [out, max_error] = res(A, B, min_error)
     
     error = A - B;
-    max_error = max(error, [], "all")
+    max_error = max(error, [], "all");
 
     %disp(m)ax_error
 
