@@ -38,7 +38,7 @@ f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
 timer = 0;
-max_timer = 40000;
+max_timer = 200000;
 cont = true;
 %figure
 %r = animatedline;
